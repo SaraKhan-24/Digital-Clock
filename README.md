@@ -1,2 +1,1 @@
-# Digital-Clock
-Building a digital clock using c++
+# Digital Clock Project Using C++
