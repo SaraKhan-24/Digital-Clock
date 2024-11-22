@@ -1,38 +1,28 @@
+#include "digitalclock.h"
 #include <iostream>
 #include <chrono>
 #include <iomanip>
-using namespace std;
+#include <thread>
 
-int main() {
-    // Get the current time in UTC (system clock)
-    auto now = chrono::system_clock::now();
+std::string getCurrentTime() {
+    auto now = std::chrono::system_clock::now();
+    auto today_duration = std::chrono::duration_cast<std::chrono::seconds>(now.time_since_epoch()) % std::chrono::hours(24);
+    auto hours = std::chrono::duration_cast<std::chrono::hours>(today_duration).count();
+    auto minutes = std::chrono::duration_cast<std::chrono::minutes>(today_duration).count() % 60;
+    auto seconds = std::chrono::duration_cast<std::chrono::seconds>(today_duration).count() % 60;
 
-    // Convert system time to seconds since epoch
-    auto today_duration = chrono::duration_cast<chrono::seconds>(now.time_since_epoch()) % chrono::hours(24);
-
-    // Convert the duration into hours, minutes, and seconds
-    auto hours = chrono::duration_cast<chrono::hours>(today_duration).count();
-    auto minutes = chrono::duration_cast<chrono::minutes>(today_duration).count() % 60;
-    auto seconds = chrono::duration_cast<chrono::seconds>(today_duration).count() % 60;
-
-    // Adjust for your local time zone manually (example: UTC+5)
     int time_zone_offset = 5; // Adjust this to your local time zone offset
     hours += time_zone_offset;
+    if (hours >= 24) hours -= 24;
 
-    // Handle the case for wrap-around when hours exceed 24
-    if (hours >= 24) {
-        hours -= 24;
-    }
-
-    // Format hours for 12-hour clock
     int display_hours = (hours % 12 == 0) ? 12 : hours % 12;
-    string am_pm = (hours < 12) ? "AM" : "PM";
+    std::string am_pm = (hours < 12) ? "AM" : "PM";
 
-    // Display the time in 12-hour format
-    cout << "Current Time: " << display_hours << " : "
-         << setw(2) << setfill('0') << minutes << " : "
-         << setw(2) << setfill('0') << seconds << " "
-         << am_pm << endl;
+    std::ostringstream time_stream;
+    time_stream << display_hours << " : "
+                << std::setw(2) << std::setfill('0') << minutes << " : "
+                << std::setw(2) << std::setfill('0') << seconds << " "
+                << am_pm;
 
-    return 0;
+    return time_stream.str();
 }
